@@ -1,4 +1,4 @@
-package chushou
+package gdt
 
 type Pos struct {
 	Id                            int64  `json:"id"`

@@ -1,7 +1,7 @@
 package main
 
 import (
-    "ssp/dsp/chushou"
+    "ssp/dsp/gdt"
 	"ssp/util"
 	"net/http"
 	"runtime"
@@ -9,7 +9,7 @@ import (
 )
 
 var handlerMap = map[string]http.HandlerFunc{
-	"/chushou": chushou.ChushouHandler,
+	"/gdt": gdt.GdtHandler,
 }
 
 func main() {

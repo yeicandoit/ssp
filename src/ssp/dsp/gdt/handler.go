@@ -1,17 +1,17 @@
-package chushou
+package gdt
 
 import (
-	"ssp/util"
 	"encoding/json"
 	"io/ioutil"
 	"net"
 	"net/http"
 	"runtime"
+	"ssp/util"
 	"strconv"
 	"time"
 )
 
-const Gdt_url = "http://mi.gdt.qq.com/api/v3"
+var GdtUrl = "http://mi.gdt.qq.com/api/v3"
 
 var dspclient = &http.Client{
 	Transport: &http.Transport{
@@ -24,25 +24,28 @@ var dspclient = &http.Client{
 	Timeout: 1000 * time.Millisecond,
 }
 
-func ChushouHandler(w http.ResponseWriter, r *http.Request) {
+func GdtHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			b := make([]byte, 1<<16)
 			n := runtime.Stack(b, false)
-			util.Log.Error("[chushou-panic]%s", b[:n])
+			util.Log.Error("[gdt-panic]%s", b[:n])
 		}
 	}()
-	req_ := Gdt_url + "?" + r.URL.RawQuery
+	req_ := GdtUrl + "?" + r.URL.RawQuery
+	util.Log.Debug("[gdt] req_:%s", req_)
 	treq, err := http.NewRequest("GET", req_, nil)
 	if err != nil {
-		util.Log.Error("[chushou] http.NewRequest:%s", err.Error())
+		util.Log.Error("[gdt] http.NewRequest:%s", err.Error())
 		responseNobid(w)
 		return
 	}
 	treq.Header.Set("X-Forwarded-For", util.GetRealIp(r))
 	treq.Header.Set("User-Agent", r.Header.Get("User-Agent"))
 	treq.Header.Set("Referer", r.Header.Get("Referer"))
+	util.Log.Debug("[gdt] X-Forwarded-For:%s, User-Agent:%s, Referer:%s",
+		util.GetRealIp(r), r.Header.Get("User-Agent"), r.Header.Get("Referer"))
 	gres, err := dspclient.Do(treq)
 	if err != nil || gres == nil {
 		responseNobid(w)
