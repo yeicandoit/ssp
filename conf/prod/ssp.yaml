@@ -1,1 +1,2 @@
 zsspserverlogconfigfile: conf/prod/log/ssp.xml
+gdturl: http://mi.gdt.qq.com/api/v3

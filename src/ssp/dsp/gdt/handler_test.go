@@ -9,7 +9,6 @@ import (
 	"net/url"
 	"testing"
 	"time"
-    "github.com/prashantv/gostub"
 )
 
 var dspclient = &http.Client{
@@ -56,8 +55,6 @@ var network = &gdt.Network{
 }
 
 func TestGdtHandler(t *testing.T) {
-    stubs := gostub.Stub(&gdt.GdtUrl, "http://test.mi.gdt.qq.com/api/v3")
-    defer stubs.Reset()
 	jpos, _ := json.Marshal(pos)
 	spos := string(jpos[:])
 	jmedia, _ := json.Marshal(media)
@@ -75,5 +72,4 @@ func TestGdtHandler(t *testing.T) {
 	gres, _ := dspclient.Do(treq)
 	body, _ := ioutil.ReadAll(gres.Body)
 	t.Log(string(body[:]))
-    t.Log(gdt.GdtUrl)
 }

@@ -40,6 +40,7 @@ var ServiceConfig struct {
 	Host                    string
 	DspImMonitor            string
 	DspCkMonitor            string
+	GdtUrl                  string
 }
 
 func init() {

@@ -11,8 +11,6 @@ import (
 	"time"
 )
 
-var GdtUrl = "http://mi.gdt.qq.com/api/v3"
-
 var dspclient = &http.Client{
 	Transport: &http.Transport{
 		Dial: (&net.Dialer{
@@ -33,7 +31,7 @@ func GdtHandler(w http.ResponseWriter, r *http.Request) {
 			util.Log.Error("[gdt-panic]%s", b[:n])
 		}
 	}()
-	req_ := GdtUrl + "?" + r.URL.RawQuery
+	req_ := util.ServiceConfig.GdtUrl + "?" + r.URL.RawQuery
 	util.Log.Debug("[gdt] req_:%s", req_)
 	treq, err := http.NewRequest("GET", req_, nil)
 	if err != nil {
