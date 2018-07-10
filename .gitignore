@@ -1,0 +1,4 @@
+*.log
+pkg
+bin
+pkg/linux_amd64

@@ -1,0 +1,11 @@
+adxdb:
+      host: d1.optaim.com
+      port: 3306
+      user: adx_read
+      db: adx 
+      pwd: "*zyz*adx2"
+
+dumpfile: dump.dat
+total_interval: 120
+inc_interval: 10
+loglevel: debug

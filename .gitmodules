@@ -1,0 +1,3 @@
+[submodule "src/tripod"]
+	path = src/tripod
+	url = git@code.optaim.com:serving/tripod.git

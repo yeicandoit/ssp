@@ -1,0 +1,11 @@
+adxdb:
+      host: 61.174.9.237
+      port: 3306
+      user: adp_test
+      db: adx 
+      pwd: adp_tmp_123
+
+dumpfile: dump.dat
+total_interval: 120
+inc_interval: 10
+loglevel: debug

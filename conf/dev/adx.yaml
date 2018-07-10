@@ -1,0 +1,10 @@
+# dev: tracker config
+#
+
+zkhosts: 127.0.0.1:2181
+zadxserverlogconfigfile: conf/dev/log/adx.xml
+indexdatafile: /opt/zyz/adx/updateIndex/dump.dat
+defaultdspaddr: http://zyz.optaim.com
+host: http://intowowtest.optaim.com
+dspimmonitor: http://imtest.optaim.com/i?settlePrice=%%WIN_PRICE%%&info=%%EXT%%
+dspckmonitor: http://cktest.optaim.com/c?info=%%EXT%%
