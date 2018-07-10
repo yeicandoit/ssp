@@ -1,30 +1,26 @@
 package main
 
 import (
-	"adx/util"
+    "ssp/dsp/chushou"
+	"ssp/util"
 	"net/http"
 	"runtime"
 	"strconv"
 )
 
 var handlerMap = map[string]http.HandlerFunc{
-	"/im":       handler.ImHandler,
-	"/ck":       handler.CkHandler,
-	"/innersdk": innersdkhandler.InsdkHandler,
+	"/chushou": chushou.ChushouHandler,
 }
 
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
-	port := strconv.Itoa(util.ZAdxServerPort)
-	util.InitIndex()
+	port := strconv.Itoa(util.ZsspServerPort)
 	for p, h := range handlerMap {
 		http.HandleFunc(p, h)
 	}
 
-	http.Handle("/wax", wax.New())
-
-	util.Log.Info("zadxserver starts listen :%s", port)
+	util.Log.Info("zsspserver starts listen :%s", port)
 	err := http.ListenAndServe(":"+port, nil)
 	util.Log.Info("%v\n", err)
 }

@@ -1,7 +1,7 @@
 package chushou
 
 import (
-	"adx/util"
+	"ssp/util"
 	"encoding/json"
 	"io/ioutil"
 	"net"
