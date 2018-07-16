@@ -1,5 +1,15 @@
 package gdt
 
+type Request struct {
+	ApiVersion   string   `json:"api_version"`
+	SupportHttps int32    `json:"support_https,omitempty"`
+	Pos          *Pos     `json:"pos"`
+	Media        *Media   `json:"media"`
+	Device       *Device  `json:"device"`
+	Network      *Network `json:"network"`
+	Geo          *Geo     `json:"geo,omitempty"`
+}
+
 type Pos struct {
 	Id                            int64  `json:"id"`
 	Width                         int32  `json:"width"`
@@ -47,23 +57,18 @@ type Geo struct {
 	CoordTime        int64   `json:"coord_time,omitempty"`
 }
 
-//responsepart
-type GdtResponse struct {
-	Ret  int64    `json:"ret"`
-	Msg  string   `json:"msg"`
-	Data *GdtData `json:"data"`
+//response
+type Response struct {
+	Ret  int64              `json:"ret"`
+	Msg  string             `json:"msg"`
+	Data map[string]*ResPos `json:"data"`
 }
 
-type GdtData struct {
-	PosId *GdtPos
-}
-
-type GdtPos struct {
+type ResPos struct {
 	List []*GdtAd `json:"list"`
 }
 
 type GdtAd struct {
-	Type                     string   `json:"type,omitempty"`
 	AdId                     string   `json:"ad_id"`
 	ImpressionLink           string   `json:"impression_link"`
 	VideoViewLink            string   `json:"video_view_link,omitempty"`
@@ -79,17 +84,4 @@ type GdtAd struct {
 	Description              string   `json:"description,omitempty"`
 	SnapshotUrl              []string `json:"snapshot_url,omitempty"`
 	VideoUrl                 string   `json:"video_url,omitempty"`
-}
-
-type GdtInformation struct {
-	Type            string   `json:"type,omitempty"`
-	InformationType string   `json:"information_type"`
-	From            string   `json:"from"`
-	Title           string   `json:"title"`
-	Images          []string `json:"images"`
-	IsBigPic        int32    `json:"is_big_pic"`
-	Url             string   `json:"url"`
-	CommentCount    int32    `json:"comment_count,omitempty"`
-	PlayCount       int32    `json:"play_count,omitempty"`
-	RunTime         int32    `json:"run_time,omitempty"`
 }

@@ -6,6 +6,7 @@ import (
 	"net"
 	"net/http"
 	"runtime"
+	"ssp/protocol/gdt"
 	"ssp/util"
 	"strconv"
 	"time"
@@ -58,7 +59,7 @@ func GdtHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func responseNobid(w http.ResponseWriter) {
-	resp := &GdtResponse{}
+	resp := &gdt.Response{}
 	bt, err := json.Marshal(resp)
 	if err != nil {
 		panic(err)
