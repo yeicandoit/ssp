@@ -1,0 +1,270 @@
+syntax = "proto2";
+package baidu;
+
+message Version {
+    optional uint32 major = 1[default = 0];
+    optional uint32 minor = 2[default = 0];
+    optional uint32 micro = 3[default = 0];
+};
+
+
+message App {
+    optional string app_id = 1[default = ""]; 
+    optional string channel_id = 2; 
+    optional Version app_version = 3; 
+    optional string app_package = 4;
+};
+
+
+message UdId {
+    optional string idfa = 1[default = ""]; 
+    optional string imei = 2[default = ""]; 
+    optional string mac = 3[default = ""]; 
+    optional string imei_md5 = 4[default = ""];
+    optional string android_id = 5[default = ""];
+    optional string baiduid = 6[default = ""];
+    optional string cuid = 7[default = ""];
+    optional string idfa_md5 = 8[default = ""];
+    optional string androidid_md5 = 9[default = ""];
+    optional string passport = 10[default = ""];
+};
+
+
+message Size {
+    optional uint32 width = 1[default = 0]; 
+    optional uint32 height = 2[default = 0]; 
+};
+
+
+message Device {
+
+    enum DeviceType {
+        PHONE = 1; 
+        TABLET = 2; 
+        SMART_TV = 3; 
+        OUTDOOR_SCREEN = 4; 
+    };
+
+    enum OsType {
+        ANDROID = 1; 
+        IOS = 2; 
+    };
+    optional DeviceType device_type = 1; 
+    optional OsType os_type = 2; 
+    optional Version os_version = 3; 
+    optional bytes vendor = 4[default = ""]; 
+    optional bytes model = 5[default = ""]; 
+    optional UdId udid = 6; 
+    optional Size screen_size = 7;
+};
+
+
+message WiFiAp {
+    optional string ap_mac = 1; 
+    optional int32 rssi = 2; 
+    optional bytes ap_name = 3; 
+    optional bool is_connected = 4; 
+};
+
+
+message Network {
+
+    enum ConnectionType {
+        CONNECTION_UNKNOWN = 0;
+        CELL_UNKNOWN = 1;
+        CELL_2G = 2;
+        CELL_3G = 3;
+        CELL_4G = 4;
+        CELL_5G = 5;
+        WIFI = 100;
+        ETHERNET = 101;
+        NEW_TYPE = 999; 
+    };
+
+    enum OperatorType {
+        UNKNOWN_OPERATOR = 0;
+        CHINA_MOBILE = 1;
+        CHINA_TELECOM = 2;
+        CHINA_UNICOM = 3;
+        OTHER_OPERATOR = 99;
+    };
+    optional string ipv4 = 1; 
+    optional ConnectionType connection_type = 2; 
+    optional OperatorType operator_type = 3; 
+    optional string cellular_id = 4; 
+    repeated WiFiAp wifi_aps = 5; 
+};
+
+
+message Gps {
+
+    enum CoordinateType {
+        WGS84 = 1; 
+        GCJ02 = 2; 
+        BD09 = 3; 
+    };
+    optional CoordinateType coordinate_type = 1; 
+    optional double longitude = 2; 
+    optional double latitude = 3; 
+    optional uint32 timestamp = 4; 
+};
+
+
+message Tracking {
+
+    enum TrackingEvent {
+       
+        AD_CLICK = 0; 
+        AD_EXPOSURE = 1;
+        AD_CLOSE = 2; 
+        
+
+        VIDEO_AD_START = 101000; 
+        VIDEO_AD_FULL_SCREEN = 101001; 
+        VIDEO_AD_END = 101002; 
+        VIDEO_AD_START_CARD_CLICK = 101003; 
+
+
+        APP_AD_DOWNLOAD = 102000; 
+        APP_AD_INSTALL = 102001; 
+        APP_AD_ACTIVE = 102002; 
+    };
+    optional TrackingEvent tracking_event = 1; 
+    repeated string tracking_url = 2; 
+};
+
+message Video {
+    optional bytes title = 1; 
+    optional uint32 content_length = 2; 
+
+    enum CopyRight {
+        CR_NONE = 0;
+        CR_EXIST = 1;
+        CR_UGC = 2;
+        CR_OTHER = 3;
+    };
+    optional CopyRight copyright = 3; 
+
+    enum MaterialFormat {
+        VIDEO_TCL_MP4 = 11; 
+        VIDEO_TCL_TS = 12;
+        VIDEO_TS = 13;
+    }
+    repeated MaterialFormat material_format = 4; 
+};
+
+message Page {
+    optional bytes url = 1; 
+    optional bytes title = 2; 
+    optional bytes source_url = 3; 
+    optional string content_id = 4; 
+    repeated bytes content_category = 5; 
+    repeated bytes content_label = 6; 
+    optional string author_id = 7; 
+};
+
+
+message AdSlot {
+    optional string adslot_id = 1; 
+    optional Size adslot_size = 2; 
+    repeated bytes topics = 3;
+    optional Video video = 4;
+    optional string ctkey = 5; 
+};
+
+
+message MobadsRequest {
+
+    enum RequestProtocolType {
+        UNKNOWN_PROTOCOL_TYPE = 0;
+        HTTP_PROTOCOL_TYPE = 1;
+        HTTPS_PROTOCOL_TYPE = 2;
+    };
+
+    optional string request_id = 1; 
+    optional Version api_version = 2; 
+    optional App app = 3; 
+    optional Device device = 4; 
+    optional Network network = 5; 
+    optional Gps gps = 6; 
+    optional AdSlot adslot = 7; 
+    optional bool is_debug = 8[default = false]; 
+    optional RequestProtocolType request_protocol_type = 9[default = HTTP_PROTOCOL_TYPE];
+    optional Page page = 10; 
+};
+
+
+
+message MetaIndex {
+    optional uint32 total_num = 1;
+    optional uint32 current_index = 2;
+};
+
+
+message MaterialMeta {
+
+    enum CreativeType {
+        NO_TYPE = 0;
+        TEXT = 1; 
+        IMAGE = 2; 
+        TEXT_ICON = 3; 
+        VIDEO = 4; 
+    };
+
+    enum InteractionType {
+        NO_INTERACTION = 0; 
+        SURFING = 1; 
+        DOWNLOAD = 2; 
+        DEEPLINK = 3; 
+    };
+    optional CreativeType creative_type = 1; 
+    optional InteractionType interaction_type = 2; 
+    repeated string win_notice_url = 3; 
+    optional string click_url = 4; 
+    optional bytes title = 5; 
+    repeated bytes description = 6; 
+    repeated string icon_src = 7; 
+    repeated string image_src = 8; 
+    optional string app_package = 9;
+    optional uint32 app_size = 10;
+    optional string video_url = 11; 
+    optional uint32 video_duration = 12; 
+    optional MetaIndex meta_index = 13;
+    optional uint32 material_width = 14; 
+    optional uint32 material_height = 15; 
+    optional string brand_name = 16;
+    optional string ad_title = 17;
+    optional uint32 material_size = 18;
+    optional bytes deeplink_url = 19; 
+    optional uint32 fallback_type = 20; 
+    optional bytes fallback_url = 21; 
+};
+
+
+
+message Ad {
+    optional string adslot_id = 1; 
+    optional bytes html_snippet = 2; 
+    optional MaterialMeta material_meta = 3; 
+    optional string ad_key = 4;
+    repeated Tracking ad_tracking = 5; 
+    repeated MaterialMeta meta_group = 6;
+    optional string mob_adtext = 7;
+    optional string mob_adlogo = 8;
+    optional uint32 cpm_bid = 9; 
+    optional string md5 = 10; 
+    optional uint32 adslot_type = 11; 
+    optional uint32 charge_type = 12; 
+    optional uint32 buyer_id = 13; 
+};
+
+
+message MobadsResponse {
+    optional string request_id = 1; 
+    optional uint64 error_code = 2; 
+    repeated Ad ads = 3; 
+    optional uint32 expiration_time = 4; 
+    optional string search_key = 5;
+    optional bytes ext_style = 6;
+};
+
