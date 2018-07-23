@@ -3,68 +3,88 @@ package gdt
 import (
 	"encoding/json"
 	"io/ioutil"
-	"net"
 	"net/http"
+	"net/url"
 	"runtime"
+	"ssp/dsp"
+	"ssp/protocol/adx"
 	"ssp/protocol/gdt"
 	"ssp/util"
 	"strconv"
 	"time"
 )
 
-var dspclient = &http.Client{
-	Transport: &http.Transport{
-		Dial: (&net.Dialer{
-			Timeout:   1000 * time.Millisecond,
-			KeepAlive: 30 * time.Second,
-		}).Dial,
-		MaxIdleConnsPerHost: 10,
-	},
-	Timeout: 1000 * time.Millisecond,
+const SidName = "gdt"
+
+func init() {
+	dsp.RegisterHandler(SidName, New())
 }
 
-func GdtHandler(w http.ResponseWriter, r *http.Request) {
-	defer func() {
-		if err := recover(); err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			b := make([]byte, 1<<16)
-			n := runtime.Stack(b, false)
-			util.Log.Error("[gdt-panic]%s", b[:n])
-		}
-	}()
-	req_ := util.ServiceConfig.GdtUrl + "?" + r.URL.RawQuery
-	util.Log.Debug("[gdt] req_:%s", req_)
+type GdtHandler struct {
+	dsp.BaseHandler
+}
+
+func New() *GdtHandler {
+	h := &GdtHandler{}
+	h.Delegate = h
+	h.Sid = SidName
+	return h
+}
+
+func (h *GdtHandler) SendDspRequest(r *http.Request, req *adx.Request) ([]byte, error) {
+	jpos, _ := json.Marshal(req.Pos)
+	jmedia, _ := json.Marshal(req.Media)
+	jdevice, _ := json.Marshal(req.Device)
+	jnetwork, _ := json.Marshal(req.Network)
+	sgeo := ""
+	if nil != req.Geo {
+		jgeo, _ := json.Marshal(req.Geo)
+		sgeo = string(jgeo[:])
+	}
+	req_ := util.ServiceConfig.GdtUrl + "?api_version=" + req.ApiVersion
+	req_ += "&support_https=" + strconv.Itoa(int64(req.SupportHttps))
+	req_ += "&pos=" + url.QueryEscape(string(jpos))
+	req_ += "&media=" + url.QueryEscape(string(jmedia))
+	req_ += "&device=" + url.QueryEscape(string(jdevice))
+	req_ += "&network=" + url.QueryEscape(string(jnetwork))
+	if sgeo != "" {
+		req_ += "&geo=" + url.QueryEscape(sgeo)
+	}
+
 	treq, err := http.NewRequest("GET", req_, nil)
 	if err != nil {
 		util.Log.Error("[gdt] http.NewRequest:%s", err.Error())
-		responseNobid(w)
-		return
+		return nil, err
 	}
 	treq.Header.Set("X-Forwarded-For", util.GetRealIp(r))
 	treq.Header.Set("User-Agent", r.Header.Get("User-Agent"))
 	treq.Header.Set("Referer", r.Header.Get("Referer"))
 	util.Log.Debug("[gdt] X-Forwarded-For:%s, User-Agent:%s, Referer:%s",
 		util.GetRealIp(r), r.Header.Get("User-Agent"), r.Header.Get("Referer"))
-	gres, err := dspclient.Do(treq)
-	if err != nil || gres == nil {
-		responseNobid(w)
-		return
+	gres, err := dsp.Dspclient.Do(treq)
+	if err != nil {
+		return nil, err
 	}
 	defer gres.Body.Close()
-	body, _ := ioutil.ReadAll(gres.Body)
-	w.Header().Set(util.KHttpContentType, util.KHttpContentTypeJson)
-	w.Header().Set(util.KHttpContentLength, strconv.Itoa(len(body)))
-	w.WriteHeader(gres.StatusCode)
-	w.Write(body)
+	body, err := ioutil.ReadAll(gres.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return body, nil
 }
 
-func responseNobid(w http.ResponseWriter) {
-	resp := &gdt.Response{}
-	bt, err := json.Marshal(resp)
+func (h *GdtHandler) BuildAdResponse(b []byte) (*adx.Response, error) {
+	gres := &gdt.Response{}
+	err := json.Unmarshal(b, gres)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	w.Header().Set(util.KHttpContentType, util.KHttpContentTypeJson)
-	w.Header().Set(util.KHttpContentLength, strconv.Itoa(len(bt)))
-	w.Write(bt)
+
+	res := &adx.Response{
+		Ret:  gres.Ret,
+		Msg:  gres.Msg,
+		Data: gres.Data,
+	}
+	return res, nil
 }
