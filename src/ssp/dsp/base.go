@@ -37,7 +37,30 @@ func RegisterHandler(name string, handler HandlerDelegate) {
 	util.Log.Info("Register handler %s", name)
 }
 
+func (self *BaseHandler) VerifyRequest(req *adx.Request) error {
+	if nil == req {
+		return errors.Error("adx.Request is nil")
+	}
+
+	if nil == req.Device {
+		return errors.Error("Device of adx.Request is nil")
+	}
+
+	if nil == req.Network {
+		return errors.Error("Network of adx.Request is nil")
+	}
+
+	if nil == req.Pos {
+		return errors.Error("Pos of adx.Request is nil")
+	}
+
+	return nil
+}
+
 func (self *BaseHandler) HanleHTTP(r *http.Request, req *adx.Request) (*adx.Response, error) {
+	if err := self.VerifyRequest(req); err != nil {
+		return nil, err
+	}
 	dspRes, err := self.Delegate.SendDspRequest(r, req)
 	if err != nil {
 		return nil, err

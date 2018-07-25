@@ -51,37 +51,37 @@ type Network struct {
 }
 
 type Geo struct {
-	Lat              int32   `json:"connect_type,omitempty"`
-	Lng              int32   `json:"carrier,omitempty"`
+	CoordinateType   int32   `json:"coordinate_type,omitempty" `
+	Lat              int32   `json:"lat,omitempty"`
+	Lng              int32   `json:"lng,omitempty"`
 	LocationAccuracy float64 `json:"location_accuracy,omitempty"`
 	CoordTime        int64   `json:"coord_time,omitempty"`
 }
 
 //response
 type Response struct {
-	Ret  int64              `json:"ret"`
-	Msg  string             `json:"msg"`
-	Data map[string]*ResPos `json:"data"`
+	Ret  int64            `json:"ret"`
+	Msg  string           `json:"msg"`
+	Data map[string][]*Ad `json:"data"`
 }
 
-type ResPos struct {
-	List []*GdtAd `json:"list"`
+type Tracking struct {
+	TrackingEvent int32    `json:"tracking_event,omitempty"`
+	TrackingUrl   []string `json:"tracking_url,omitempty"`
 }
 
-type GdtAd struct {
-	AdId                     string   `json:"ad_id"`
-	ImpressionLink           string   `json:"impression_link"`
-	VideoViewLink            string   `json:"video_view_link,omitempty"`
-	ClickLink                string   `json:"click_link"`
-	InteractType             int32    `json:"interact_type"`
-	ConversionLink           string   `json:"conversion_link,omitempty"`
-	IsFullScreenInterstitial bool     `json:"is_full_screen_interstitial,omitempty"`
-	HtmlSippet               string   `json:"html_snippet,omitempty"`
-	CrtType                  int32    `json:"crt_type,omitempty"`
-	ImgUrl                   string   `json:"img_url,omitempty"`
-	Img2Url                  string   `json:"img2d_url,omitempty"`
-	Title                    string   `json:"title,omitempty"`
-	Description              string   `json:"description,omitempty"`
-	SnapshotUrl              []string `json:"snapshot_url,omitempty"`
-	VideoUrl                 string   `json:"video_url,omitempty"`
+type Ad struct {
+	AdId                     string      `json:"ad_id"`
+	ImpressionLink           []string    `json:"impression_link"`
+	ClickLink                string      `json:"click_link"`
+	InteractType             int32       `json:"interact_type"`
+	AdTracking               []*Tracking `json:"ad_tracking,omitempty"`
+	IsFullScreenInterstitial bool        `json:"is_full_screen_interstitial,omitempty"`
+	HtmlSippet               string      `json:"html_snippet,omitempty"`
+	CrtType                  int32       `json:"crt_type,omitempty"`
+	ImgUrl                   []string    `json:"img_url,omitempty"`
+	Title                    string      `json:"title,omitempty"`
+	Description              []string    `json:"description,omitempty"`
+	SnapshotUrl              []string    `json:"snapshot_url,omitempty"`
+	VideoUrl                 string      `json:"video_url,omitempty"`
 }

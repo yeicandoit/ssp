@@ -41,6 +41,7 @@ var ServiceConfig struct {
 	DspImMonitor            string
 	DspCkMonitor            string
 	GdtUrl                  string
+	BaiduUrl                string
 }
 
 func init() {
