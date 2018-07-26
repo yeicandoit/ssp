@@ -11,14 +11,41 @@ import (
 )
 
 const ServiceConfigFile = "conf/ssp.yaml"
+const AdslotConfigFile = "conf/adslot.yaml"
 
 var Log l4g.Logger
 
 var (
 	rootPath       string
 	ZsspServerPort int
-	CheckInterval  time.Duration
+	AdxRedisPool   *devkit.ZRedis
 )
+
+var ServiceConfig struct {
+	ZsspServerLogConfigFile string
+	GdtUrl                  string
+	BaiduUrl                string
+	AdxRedisAddress         []string
+}
+
+var Adslot = map[string]*SlotConfig{}
+
+type SlotConfig struct {
+	Dsp             string
+	RequestTotal    int
+	RequestDaily    int
+	ImpressionTotal int
+	ImpressionDaily int
+	Location        string
+	EndDate         string
+	Filter          *Filter
+}
+
+type Filter struct {
+	Title    string
+	Desc     string
+	Imageurl string
+}
 
 func parseArgs() {
 	flag.StringVar(&rootPath, "rootPath", "/opt/zyz/ssp", "Root Path")
@@ -34,23 +61,18 @@ func parseArgs() {
 	}
 }
 
-var ServiceConfig struct {
-	ZsspServerLogConfigFile string
-	ConfCheckInterval       int
-	Host                    string
-	DspImMonitor            string
-	DspCkMonitor            string
-	GdtUrl                  string
-	BaiduUrl                string
-}
-
 func init() {
 	parseArgs()
 	err := zconf.ParseYaml(filepath.Join(rootPath, ServiceConfigFile), &ServiceConfig)
 	if err != nil {
 		panic(err)
 	}
-	CheckInterval = time.Duration(ServiceConfig.ConfCheckInterval)
+	err = zconf.ParseYaml(filepath.Join(rootPath, AdslotConfigFile), &Adslot)
+	if err != nil {
+		panic(err)
+	}
+	AdxRedisPool = devkit.NewZRedis(ServiceConfig.AdxRedisAddress)
 	Log = devkit.NewLogger(devkit.GetAbsPath(ServiceConfig.ZsspServerLogConfigFile, rootPath))
 	Log.Info("zsspserver config: %+v", ServiceConfig)
+	Log.Info("adslot config: %+v", Adslot)
 }

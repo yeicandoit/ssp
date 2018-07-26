@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"runtime"
 	"ssp/dsp"
 	"ssp/protocol/adx"
 	"ssp/protocol/gdt"

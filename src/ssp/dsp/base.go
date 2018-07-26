@@ -57,7 +57,7 @@ func (self *BaseHandler) VerifyRequest(req *adx.Request) error {
 	return nil
 }
 
-func (self *BaseHandler) HanleHTTP(r *http.Request, req *adx.Request) (*adx.Response, error) {
+func (self *BaseHandler) Handle(r *http.Request, req *adx.Request) (*adx.Response, error) {
 	if err := self.VerifyRequest(req); err != nil {
 		return nil, err
 	}

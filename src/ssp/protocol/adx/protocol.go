@@ -11,7 +11,7 @@ type Request struct {
 }
 
 type Pos struct {
-	Id                            int64  `json:"id"`
+	Id                            string `json:"id"`
 	Width                         int32  `json:"width"`
 	Height                        int32  `json:"height"`
 	SupportFullScreenInterstitial bool   `json:"support_full_screen_interstitial,omitempty"`
