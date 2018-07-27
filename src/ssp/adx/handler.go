@@ -8,6 +8,7 @@ import (
 	"ssp/dsp"
 	"ssp/protocol/adx"
 	"ssp/util"
+	"strings"
 )
 
 func Handler(w http.ResponseWriter, req *http.Request) {
@@ -51,11 +52,37 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
-	if err = checkReq(adslotId, slotConfig); err != nil {
-		util.Log.Error(err.Error())
+
+	// Region filter
+	if nil != slotConfig.Location {
+		realIp := util.GetRealIp(req)
+		regionFilter := true
+		for _, r := range slotConfig.Location {
+			if true == util.CheckIp4Region(realIp, r) {
+				regionFilter == false
+				break
+			}
+		}
+		if true == regionFilter {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+	}
+
+	// Request count limit
+	adslotInfo = GetAdslotInfo(adslotId)
+	if ok = checkReq(adslotId, adslotInfo, slotConfig); ok != true {
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
+
+	// Smooth control
+	if ok = smoothControl(adslotId, adslotInfo, slotConfig); ok != true {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+
+	// Dsp handle
 	handler, ok := dsp.HandlerMap[slotConfig.Dsp]
 	if false == ok || nil == handler {
 		util.Log.Error("The adslot has no dsp, adslot id:%s", adslotId)
@@ -67,6 +94,15 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 		util.Log.Error("%s, adslot id:%s", err.Error(), adslotId)
 		w.WriteHeader(http.StatusNoContent)
 		return
+	}
+
+	// Response content filter
+	if checkResContent(adslotId, res, slotConfig) != true {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+	if res.Ret == 0 {
+		IncField(adslotId, preImp, slotConfig.EndDate)
 	}
 	resp, err := json.Marshal(res)
 	if nil != err {
@@ -80,27 +116,36 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 
 }
 
-func checkReq(adslotId string, slotConfig *util.SlotConfig) error {
-	if nil == slotConfig {
-		return errors.New("The slotConfig is nil, adslot id:%s", adslotId)
+func checkResContent(adslotId string, res *adx.Response, slotConfig *util.SlotConfig) bool {
+	if nil == slotConfig.Filter {
+		return true
 	}
-
-	adslotInfo = GetAdslotInfo(adslotId)
-	if nil == adslotInfo {
-		return nil
+	for _, ad := range res[adslotId] {
+		for _, title := range slotConfig.Filter.Title {
+			if strings.Contains(ad.Title, title) {
+				util.Log.Debug("Title filter, adslot id:%s, response title:%s, filter title:%s",
+					adslotId, ad.Title, title)
+				return false
+			}
+		}
+		for _, desc := range ad.Description {
+			for _, fdesc := range slotConfig.Filter.Desc {
+				if strings.Contains(desc, fdesc) {
+					util.Log.Debug("Desc filter, adslot id:%s, response desc:%s, filter desc:%s",
+						adslotId, desc, fdesc)
+					return false
+				}
+			}
+		}
+		for _, imgUrl := range ad.ImgUrl {
+			for _, fimgUrl := range slotConfig.Filter.Imageurl {
+				if strings.Contains(imgUrl, fimgUrl) {
+					util.Log.Debug("Image url filter, adslot id:%s, response url:%s, filter url:%s",
+						adslotId, imgUrl, fimgUrl)
+					return false
+				}
+			}
+		}
 	}
-	if adslotInfo[makeFieldTotal(preReq)] > slotConfig.RequestTotal {
-		return errors.New("Request total is over limit, adslot id:%s", adslotId)
-	}
-	if adslotInfo[makeField(preReq, 0)] > slotConfig.RequestDaily {
-		return errors.New("Request daily is over limit, adslot id:%s", adslotId)
-	}
-	if adslotInfo[makeFieldTotal(preImp)] > slotConfig.ImpressionTotal {
-		return errors.New("Impression total is over limit, adslot id:%s", adslotId)
-	}
-	if adslotInfo[makeField(preImp, 0)] > slotConfig.ImpressionDaily {
-		return errors.New("Impression daily is over limit, adslot id:%s", adslotId)
-	}
-	IncField(adslotId, preReq, slotConfig.EndDate)
-	return nil
+	return true
 }

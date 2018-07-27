@@ -26,25 +26,26 @@ var ServiceConfig struct {
 	GdtUrl                  string
 	BaiduUrl                string
 	AdxRedisAddress         []string
+	Ipfile                  string
 }
 
 var Adslot = map[string]*SlotConfig{}
 
 type SlotConfig struct {
 	Dsp             string
-	RequestTotal    int
-	RequestDaily    int
-	ImpressionTotal int
-	ImpressionDaily int
-	Location        string
+	RequestTotal    int64
+	RequestDaily    int64
+	ImpressionTotal int64
+	ImpressionDaily int64
+	Location        []int64
 	EndDate         string
 	Filter          *Filter
 }
 
 type Filter struct {
-	Title    string
-	Desc     string
-	Imageurl string
+	Title    []string
+	Desc     []string
+	Imageurl []string
 }
 
 func parseArgs() {

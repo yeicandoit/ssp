@@ -29,8 +29,9 @@ var (
 )
 
 const (
-	preReq = "req"
-	preImp = "imp"
+	preReq              = "req"
+	preImp              = "imp"
+	smoothScale float64 = 0.05
 )
 
 func init() {
@@ -78,7 +79,7 @@ func GetAdslotInfo(adslotId string) map[string]int {
 				util.Log.Error("Get adslot info field key:%s", err.Error())
 				return nil
 			}
-			v, err := redis.Int(result[i], nil)
+			v, err := redis.Int64(result[i], nil)
 			if err != nil {
 				util.Log.Error("Get adslot info field value:%s", err.Error())
 				return nil
@@ -104,4 +105,55 @@ func IncField(adslotId, prefix string, expireAt string) error {
 	defer conn.Close()
 	_, err := imScript.Do(conn, key, filedTotal, fieldToday, fieldYesterday, timestamp)
 	return err
+}
+
+func checkReq(adslotId string, adslotInfo map[string]int, slotConfig *util.SlotConfig) bool {
+	if nil == slotConfig {
+		util.Log.Error("The slotConfig is nil, adslot id:%s", adslotId)
+		return false
+	}
+	if nil == adslotInfo {
+		return true
+	}
+	if reqTotal := adslotInfo[makeFieldTotal(preReq)]; reqTotal > slotConfig.RequestTotal {
+		util.Log.Debug("Request total is over limit, adslot id:%s, req total: %d",
+			adslotId, reqTotal)
+		return false
+	}
+	if reqDaily := adslotInfo[makeField(preReq, 0)]; reqDaily > slotConfig.RequestDaily {
+		util.Log.Debug("Request daily is over limit, adslot id:%s, req daily:%d",
+			adslotId, reqDaily)
+		return false
+	}
+	if impTotal := adslotInfo[makeFieldTotal(preImp)]; impTotal > slotConfig.ImpressionTotal {
+		util.Log.Debug("Impression total is over limit, adslot id:%s, imp total:%d",
+			adslotId, impTotal)
+		return false
+	}
+	if impDaily := adslotInfo[makeField(preImp, 0)]; impDaily > slotConfig.ImpressionDaily {
+		util.Log.Debug("Impression daily is over limit, adslot id:%s, imp daily:%d",
+			adslotId, impDaily)
+		return false
+	}
+	IncField(adslotId, preReq, slotConfig.EndDate)
+	return true
+}
+
+func smoothControl(adslotId string, adslotInfo map[string]int, slotConfig *util.SlotConfig) bool {
+	// Only control request smoothly
+	if nil == adslotInfo {
+		return true
+	}
+	year, month, day := time.Now().Date()
+	today := time.Date(year, month, day, 0, 0, 0, 0, time.Local)
+	t := time.Now()
+	percent := float64(t.Unix()-today.Unix()) / float64(86400)
+	target := percent * (float64(slotConfig.RequestDaily)) * (1 + smoothScale)
+	if reqDaily := adslotInfo[makeField(preReq, 0)]; reqDaily > target {
+		util.Log.Debug("Smooth control, adslot id:%s, req daily now:%d, target:%d",
+			adslotId, reqDaily, target)
+		return false
+	}
+
+	return true
 }

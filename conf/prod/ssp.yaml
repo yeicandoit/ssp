@@ -1,2 +1,6 @@
 zsspserverlogconfigfile: conf/prod/log/ssp.xml
 gdturl: http://mi.gdt.qq.com/api/v3
+baiduurl: http://baidu.com
+ipfile: conf/ip.csv
+adxredispool:
+	- 127.0.0.1:6379
