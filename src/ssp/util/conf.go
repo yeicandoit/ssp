@@ -72,6 +72,7 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
+	initIpCache()
 	AdxRedisPool = devkit.NewZRedis(ServiceConfig.AdxRedisAddress)
 	Log = devkit.NewLogger(devkit.GetAbsPath(ServiceConfig.ZsspServerLogConfigFile, rootPath))
 	Log.Info("zsspserver config: %+v", ServiceConfig)

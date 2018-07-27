@@ -31,6 +31,7 @@ var (
 const (
 	preReq              = "req"
 	preImp              = "imp"
+	online              = "online"
 	smoothScale float64 = 0.05
 )
 
@@ -53,9 +54,9 @@ func makeFieldTotal(prefix string) string {
 	return fmt.Printf("%s_total", prefix)
 }
 
-func GetAdslotInfo(adslotId string) map[string]int {
+func GetAdslotInfo(adslotId string) map[string]int64 {
 	// Ad slot info contains: req_total, req_<day>, imp_total, imp_<day>
-	adslotInfo = make(map[string]int)
+	adslotInfo = make(map[string]int64)
 	key := makeKey(adslotId)
 	conn := adxRedisPool.GetConn(key)
 	defer conn.Close()
@@ -114,6 +115,13 @@ func checkReq(adslotId string, adslotInfo map[string]int, slotConfig *util.SlotC
 	}
 	if nil == adslotInfo {
 		return true
+	}
+	// Check whether the adslot is online
+	if ol, ok := adslotInfo[online]; ok {
+		if 0 == ol {
+			util.Log.Debug("Adslot is not online, adslot id:%d", adslotId)
+			return false
+		}
 	}
 	if reqTotal := adslotInfo[makeFieldTotal(preReq)]; reqTotal > slotConfig.RequestTotal {
 		util.Log.Debug("Request total is over limit, adslot id:%s, req total: %d",

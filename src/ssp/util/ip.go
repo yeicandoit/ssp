@@ -43,9 +43,6 @@ func initIpCache() {
 			StartIp: InetAtoN(ipRegion[0]),
 			EndIp:   InetAtoN(ipRegion[1]),
 		}
-		if nil == Region2Ip[regionCode] {
-			Region2Ip[regionCode] = make([]*RegionIp, 1)
-		}
 		Region2Ip[regionCode] = append(Region2Ip[regionCode], rip)
 	}
 }
