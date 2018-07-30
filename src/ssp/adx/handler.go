@@ -2,12 +2,13 @@ package adx
 
 import (
 	"encoding/json"
-	"errors"
 	"io/ioutil"
 	"net/http"
+	"runtime"
 	"ssp/dsp"
 	"ssp/protocol/adx"
 	"ssp/util"
+	"strconv"
 	"strings"
 )
 
@@ -59,7 +60,7 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 		regionFilter := true
 		for _, r := range slotConfig.Location {
 			if true == util.CheckIp4Region(realIp, r) {
-				regionFilter == false
+				regionFilter = false
 				break
 			}
 		}
@@ -70,7 +71,7 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 	}
 
 	// Request count limit
-	adslotInfo = GetAdslotInfo(adslotId)
+	adslotInfo := GetAdslotInfo(adslotId)
 	if ok = checkReq(adslotId, adslotInfo, slotConfig); ok != true {
 		w.WriteHeader(http.StatusNoContent)
 		return
@@ -89,7 +90,7 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
-	res, err := handler(req, adxReq)
+	res, err := handler.Handle(req, adxReq)
 	if nil != err {
 		util.Log.Error("%s, adslot id:%s", err.Error(), adslotId)
 		w.WriteHeader(http.StatusNoContent)
@@ -120,7 +121,7 @@ func checkResContent(adslotId string, res *adx.Response, slotConfig *util.SlotCo
 	if nil == slotConfig.Filter {
 		return true
 	}
-	for _, ad := range res[adslotId] {
+	for _, ad := range res.Data[adslotId] {
 		for _, title := range slotConfig.Filter.Title {
 			if strings.Contains(ad.Title, title) {
 				util.Log.Debug("Title filter, adslot id:%s, response title:%s, filter title:%s",

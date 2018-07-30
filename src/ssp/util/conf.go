@@ -3,7 +3,6 @@ package util
 import (
 	"flag"
 	"path/filepath"
-	"time"
 	"tripod/devkit"
 	"tripod/zconf"
 

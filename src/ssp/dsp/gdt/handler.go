@@ -10,7 +10,6 @@ import (
 	"ssp/protocol/gdt"
 	"ssp/util"
 	"strconv"
-	"time"
 )
 
 const SidName = "gdt"
@@ -41,7 +40,7 @@ func (h *GdtHandler) SendDspRequest(r *http.Request, req *adx.Request) ([]byte, 
 		sgeo = string(jgeo[:])
 	}
 	req_ := util.ServiceConfig.GdtUrl + "?api_version=" + req.ApiVersion
-	req_ += "&support_https=" + strconv.Itoa(int64(req.SupportHttps))
+	req_ += "&support_https=" + strconv.Itoa(int(req.SupportHttps))
 	req_ += "&pos=" + url.QueryEscape(string(jpos))
 	req_ += "&media=" + url.QueryEscape(string(jmedia))
 	req_ += "&device=" + url.QueryEscape(string(jdevice))
@@ -81,9 +80,10 @@ func (h *GdtHandler) BuildAdResponse(b []byte) (*adx.Response, error) {
 	}
 
 	res := &adx.Response{
-		Ret:  gres.Ret,
-		Msg:  gres.Msg,
-		Data: gres.Data,
+		Ret: gres.Ret,
+		Msg: gres.Msg,
+		// TODO Set adx response
+		// Data: gres.Data,
 	}
 	return res, nil
 }

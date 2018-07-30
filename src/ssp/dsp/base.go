@@ -1,9 +1,12 @@
 package dsp
 
 import (
+	"errors"
+	"net"
 	"net/http"
 	"ssp/protocol/adx"
 	"ssp/util"
+	"time"
 )
 
 var Dspclient = &http.Client{
@@ -20,6 +23,7 @@ var Dspclient = &http.Client{
 var HandlerMap = map[string]HandlerDelegate{}
 
 type HandlerDelegate interface {
+	Handle(r *http.Request, req *adx.Request) (*adx.Response, error)
 	SendDspRequest(r *http.Request, req *adx.Request) ([]byte, error)
 	BuildAdResponse(b []byte) (*adx.Response, error)
 }
@@ -39,19 +43,19 @@ func RegisterHandler(name string, handler HandlerDelegate) {
 
 func (self *BaseHandler) VerifyRequest(req *adx.Request) error {
 	if nil == req {
-		return errors.Error("adx.Request is nil")
+		return errors.New("adx.Request is nil")
 	}
 
 	if nil == req.Device {
-		return errors.Error("Device of adx.Request is nil")
+		return errors.New("Device of adx.Request is nil")
 	}
 
 	if nil == req.Network {
-		return errors.Error("Network of adx.Request is nil")
+		return errors.New("Network of adx.Request is nil")
 	}
 
 	if nil == req.Pos {
-		return errors.Error("Pos of adx.Request is nil")
+		return errors.New("Pos of adx.Request is nil")
 	}
 
 	return nil

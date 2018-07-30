@@ -61,7 +61,7 @@ type Geo struct {
 type Response struct {
 	Ret  int64              `json:"ret"`
 	Msg  string             `json:"msg"`
-	Data map[string]*ResPos `json:"data"`
+	Data map[string][]*ResPos `json:"data"`
 }
 
 type ResPos struct {

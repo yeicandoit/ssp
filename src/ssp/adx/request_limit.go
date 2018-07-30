@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"ssp/util"
 	"time"
-	"tripod/devkit"
 
 	"github.com/garyburd/redigo/redis"
 )
@@ -40,23 +39,23 @@ func init() {
 }
 
 func makeKey(adslotId string) string {
-	return fmt.Printf("adslot_%s", adslotId)
+	return fmt.Sprintf("adslot_%s", adslotId)
 }
 
 func makeField(prefix string, d int) string {
 	now := time.Now()
 	date := now.AddDate(0, 0, d)
 	dateStr := date.Format("20060102")
-	return fmt.Printf("%s_%s", prefix, dateStr)
+	return fmt.Sprintf("%s_%s", prefix, dateStr)
 }
 
 func makeFieldTotal(prefix string) string {
-	return fmt.Printf("%s_total", prefix)
+	return fmt.Sprintf("%s_total", prefix)
 }
 
 func GetAdslotInfo(adslotId string) map[string]int64 {
 	// Ad slot info contains: req_total, req_<day>, imp_total, imp_<day>
-	adslotInfo = make(map[string]int64)
+	adslotInfo := make(map[string]int64)
 	key := makeKey(adslotId)
 	conn := adxRedisPool.GetConn(key)
 	defer conn.Close()
@@ -108,7 +107,7 @@ func IncField(adslotId, prefix string, expireAt string) error {
 	return err
 }
 
-func checkReq(adslotId string, adslotInfo map[string]int, slotConfig *util.SlotConfig) bool {
+func checkReq(adslotId string, adslotInfo map[string]int64, slotConfig *util.SlotConfig) bool {
 	if nil == slotConfig {
 		util.Log.Error("The slotConfig is nil, adslot id:%s", adslotId)
 		return false
@@ -147,7 +146,7 @@ func checkReq(adslotId string, adslotInfo map[string]int, slotConfig *util.SlotC
 	return true
 }
 
-func smoothControl(adslotId string, adslotInfo map[string]int, slotConfig *util.SlotConfig) bool {
+func smoothControl(adslotId string, adslotInfo map[string]int64, slotConfig *util.SlotConfig) bool {
 	// Only control request smoothly
 	if nil == adslotInfo {
 		return true
@@ -157,7 +156,7 @@ func smoothControl(adslotId string, adslotInfo map[string]int, slotConfig *util.
 	t := time.Now()
 	percent := float64(t.Unix()-today.Unix()) / float64(86400)
 	target := percent * (float64(slotConfig.RequestDaily)) * (1 + smoothScale)
-	if reqDaily := adslotInfo[makeField(preReq, 0)]; reqDaily > target {
+	if reqDaily := adslotInfo[makeField(preReq, 0)]; float64(reqDaily) > target {
 		util.Log.Debug("Smooth control, adslot id:%s, req daily now:%d, target:%d",
 			adslotId, reqDaily, target)
 		return false

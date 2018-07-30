@@ -2,8 +2,10 @@ package util
 
 import (
 	"bufio"
+	"io"
 	"math/big"
 	"net"
+	"os"
 	"strconv"
 	"strings"
 )
@@ -16,7 +18,7 @@ type RegionIp struct {
 var Region2Ip map[int64][]*RegionIp
 
 func initIpCache() {
-	Region2Ip = make(map[int][]*RegionIp)
+	Region2Ip = make(map[int64][]*RegionIp)
 	fi, err := os.Open(rootPath + "/" + ServiceConfig.Ipfile)
 	if err != nil {
 		Log.Error("Open ip file:%s", err.Error())
