@@ -30,7 +30,19 @@ func New() *GdtHandler {
 }
 
 func (h *GdtHandler) SendDspRequest(r *http.Request, req *adx.Request) ([]byte, error) {
-	jpos, _ := json.Marshal(req.Pos)
+	pid, _ := strconv.ParseInt(req.Pos.Id, 10, 64)
+	pos := &gdt.Pos{
+		Id:     pid,
+		Width:  req.Pos.Width,
+		Height: req.Pos.Height,
+		SupportFullScreenInterstitial: req.Pos.SupportFullScreenInterstitial,
+		AdCount:        req.Pos.AdCount,
+		NeedRenderedAd: req.Pos.NeedRenderedAd,
+		LastAdIds:      req.Pos.LastAdIds,
+		Channel:        req.Pos.Channel,
+		PageNumber:     req.Pos.PageNumber,
+	}
+	jpos, _ := json.Marshal(pos)
 	jmedia, _ := json.Marshal(req.Media)
 	jdevice, _ := json.Marshal(req.Device)
 	jnetwork, _ := json.Marshal(req.Network)
@@ -82,8 +94,54 @@ func (h *GdtHandler) BuildAdResponse(b []byte) (*adx.Response, error) {
 	res := &adx.Response{
 		Ret: gres.Ret,
 		Msg: gres.Msg,
-		// TODO Set adx response
-		// Data: gres.Data,
 	}
+
+	res.Data = make(map[string][]*adx.Ad)
+	for k, v := range gres.Data {
+		for _, gad := range v.List {
+			ad := &adx.Ad{
+				AdId:                     gad.AdId,
+				ImpressionLink:           []string{gad.ImpressionLink},
+				ClickLink:                gad.ClickLink,
+				InteractType:             gad.InteractType,
+				IsFullScreenInterstitial: gad.IsFullScreenInterstitial,
+				HtmlSippet:               gad.HtmlSippet,
+				CrtType:                  gad.CrtType,
+				ImgUrl: func() []string {
+					imgUrl := make([]string, 0)
+					if "" != gad.ImgUrl {
+						imgUrl = append(imgUrl, gad.ImgUrl)
+					}
+					if "" != gad.Img2Url {
+						imgUrl = append(imgUrl, gad.Img2Url)
+					}
+					return imgUrl
+				}(),
+				Title:       gad.Title,
+				Description: []string{gad.Description},
+				SnapshotUrl: gad.SnapshotUrl,
+			}
+			ad.AdTracking = make([]*adx.Tracking, 0)
+			if "" != gad.VideoViewLink {
+				atrack := &adx.Tracking{
+					TrackingEvent: 101002,
+					TrackingUrl:   []string{gad.VideoViewLink},
+				}
+				ad.AdTracking = append(ad.AdTracking, atrack)
+			}
+			if "" != gad.ConversionLink {
+				event := []int32{102000, 102001, 102002}
+				for _, e := range event {
+					tk := &adx.Tracking{
+						TrackingEvent: e,
+						TrackingUrl:   []string{gad.ConversionLink},
+					}
+					ad.AdTracking = append(ad.AdTracking, tk)
+				}
+			}
+			res.Data[k] = append(res.Data[k], ad)
+		}
+	}
+
 	return res, nil
 }

@@ -5,7 +5,6 @@ import (
 	"net"
 	"net/http"
 	"ssp/protocol/adx"
-	"ssp/util"
 	"time"
 )
 
@@ -38,7 +37,6 @@ func RegisterHandler(name string, handler HandlerDelegate) {
 		panic("handler already exists. name:" + name)
 	}
 	HandlerMap[name] = handler
-	util.Log.Info("Register handler %s", name)
 }
 
 func (self *BaseHandler) VerifyRequest(req *adx.Request) error {

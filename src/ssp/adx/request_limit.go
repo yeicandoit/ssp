@@ -8,18 +8,24 @@ import (
 	"github.com/garyburd/redigo/redis"
 )
 
+// req and imp count will be set through this lua script
+// TODO increasing req and imp could only use one lua script
 const imLuaScript = `
 if redis.call('TTL', KEYS[1]) < 0 then
-	redis.call('HMSET', KEYS[1], ARGV[1], 1, ARGV[2], 1);
-	redis.call('EXPIREAT', KEYS[1], ARGV[4]);
+    redis.call('HMSET', KEYS[1], ARGV[1], 1, ARGV[2], 1);
+    redis.call('EXPIREAT', KEYS[1], ARGV[4]);
 else 
-	redis.call('HINCRBY', KEYS[1], ARGV[1], 1);
-	if redis.call('HEXISTS', KEYS[1], ARGV[2]) == 1 then
-		redis.call('HINCRBY', KEYS[1], ARGV[2], 1);
-	else
-		redis.call('HMSET', KEYS[1], ARGV[2], 1);
-		redis.call('HDEL', KEYS[1], ARGV[3]);
-	end;
+    if redis.call('HEXISTS', KEYS[1], ARGV[1]) == 1 then
+        redis.call('HINCRBY', KEYS[1], ARGV[1], 1);
+    else
+        redis.call('HMSET', KEYS[1], ARGV[1], 1);
+    end;
+    if redis.call('HEXISTS', KEYS[1], ARGV[2]) == 1 then
+        redis.call('HINCRBY', KEYS[1], ARGV[2], 1);
+    else
+        redis.call('HMSET', KEYS[1], ARGV[2], 1);
+        redis.call('HDEL', KEYS[1], ARGV[3]);
+    end;
 end `
 
 var (
@@ -67,25 +73,23 @@ func GetAdslotInfo(adslotId string) map[string]int64 {
 		util.Log.Error("GetAdslotInfo for %s:%s", key, err.Error())
 		return nil
 	}
-	if 8 != len(result) {
-		util.Log.Error("Ad slot key:%s, field num:%d", key, len(result))
-		return nil
-	}
 	for i := 0; i < len(result); {
-		i = i + 2
 		if i+1 < len(result) {
 			k, err := redis.String(result[i], nil)
 			if err != nil {
 				util.Log.Error("Get adslot info field key:%s", err.Error())
 				return nil
 			}
-			v, err := redis.Int64(result[i], nil)
+			v, err := redis.Int64(result[i+1], nil)
 			if err != nil {
 				util.Log.Error("Get adslot info field value:%s", err.Error())
 				return nil
 			}
 			adslotInfo[k] = v
-		}
+		} else {
+            break
+        }
+		i = i + 2
 	}
 
 	return adslotInfo
@@ -157,7 +161,7 @@ func smoothControl(adslotId string, adslotInfo map[string]int64, slotConfig *uti
 	percent := float64(t.Unix()-today.Unix()) / float64(86400)
 	target := percent * (float64(slotConfig.RequestDaily)) * (1 + smoothScale)
 	if reqDaily := adslotInfo[makeField(preReq, 0)]; float64(reqDaily) > target {
-		util.Log.Debug("Smooth control, adslot id:%s, req daily now:%d, target:%d",
+		util.Log.Debug("Smooth control, adslot id:%s, req daily now:%d, target:%f",
 			adslotId, reqDaily, target)
 		return false
 	}

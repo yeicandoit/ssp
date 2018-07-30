@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"runtime"
 	"ssp/dsp"
+	_ "ssp/dsp/gdt"
 	"ssp/protocol/adx"
 	"ssp/util"
 	"strconv"
@@ -86,7 +87,8 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 	// Dsp handle
 	handler, ok := dsp.HandlerMap[slotConfig.Dsp]
 	if false == ok || nil == handler {
-		util.Log.Error("The adslot has no dsp, adslot id:%s", adslotId)
+		util.Log.Error("The adslot has no dsp:%s, adslot id:%s", slotConfig.Dsp, adslotId)
+		util.Log.Debug("HandlerMap info:%+v", dsp.HandlerMap)
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}

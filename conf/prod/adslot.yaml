@@ -1,19 +1,19 @@
 1:
-	dsp: gdt
-	requesttotal: 1000
-	requestdaily: 10
-	impressiontotal: 1000
-	impressiondaily: 10
-	location: 
-		-: 1156110000
-		-: 1156120000
-	startdate: 2018-08-20
-	enddate: 2018-09-30
-	filter:
-		title: 
-			-: 黄天当立
-			-: 苍天已死
-		desc: 
-			-: 黄巾军
-		imageurl: 
-			-: http://www.image.com
+    dsp: gdt
+    requesttotal: 1000
+    requestdaily: 10
+    impressiontotal: 1000
+    impressiondaily: 10
+    location: 
+        -: 1156110000
+        -: 1156120000
+    startdate: 2018-08-20
+    enddate: 2018-09-30
+    filter:
+        title: 
+            -: 黄天当立
+            -: 苍天已死
+        desc: 
+            -: 黄巾军
+        imageurl: 
+            -: http://www.image.com
