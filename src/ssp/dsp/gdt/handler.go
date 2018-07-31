@@ -107,19 +107,11 @@ func (h *GdtHandler) BuildAdResponse(b []byte) (*adx.Response, error) {
 				IsFullScreenInterstitial: gad.IsFullScreenInterstitial,
 				HtmlSippet:               gad.HtmlSippet,
 				CrtType:                  gad.CrtType,
-				ImgUrl: func() []string {
-					imgUrl := make([]string, 0)
-					if "" != gad.ImgUrl {
-						imgUrl = append(imgUrl, gad.ImgUrl)
-					}
-					if "" != gad.Img2Url {
-						imgUrl = append(imgUrl, gad.Img2Url)
-					}
-					return imgUrl
-				}(),
-				Title:       gad.Title,
-				Description: []string{gad.Description},
-				SnapshotUrl: gad.SnapshotUrl,
+				ImgUrl:                   []string{gad.ImgUrl},
+				Img2Url:                  gad.Img2Url,
+				Title:                    gad.Title,
+				Description:              []string{gad.Description},
+				SnapshotUrl:              gad.SnapshotUrl,
 			}
 			ad.AdTracking = make([]*adx.Tracking, 0)
 			if "" != gad.VideoViewLink {

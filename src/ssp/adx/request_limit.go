@@ -146,7 +146,7 @@ func checkReq(adslotId string, adslotInfo map[string]int64, slotConfig *util.Slo
 			adslotId, impDaily)
 		return false
 	}
-	IncField(adslotId, preReq, slotConfig.EndDate)
+
 	return true
 }
 

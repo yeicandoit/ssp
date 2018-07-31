@@ -80,6 +80,7 @@ type Ad struct {
 	HtmlSippet               string      `json:"html_snippet,omitempty"`
 	CrtType                  int32       `json:"crt_type,omitempty"`
 	ImgUrl                   []string    `json:"img_url,omitempty"`
+	Img2Url                  string      `json:"img2_url,omitempty"`
 	Title                    string      `json:"title,omitempty"`
 	Description              []string    `json:"description,omitempty"`
 	SnapshotUrl              []string    `json:"snapshot_url,omitempty"`

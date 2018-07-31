@@ -83,6 +83,7 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
+	IncField(adslotId, preReq, slotConfig.EndDate)
 
 	// Dsp handle
 	handler, ok := dsp.HandlerMap[slotConfig.Dsp]
